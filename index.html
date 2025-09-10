@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sudarshana AI - Speech to Text</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0d0d0d, #1a001a);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .card {
+      background: rgba(30, 0, 40, 0.9);
+      border-radius: 20px;
+      padding: 30px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 0 30px rgba(140, 0, 255, 0.6);
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      color: #d580ff;
+    }
+    h2 {
+      font-size: 16px;
+      font-weight: normal;
+      color: #aaa;
+      margin-bottom: 20px;
+    }
+    input[type="file"] {
+      display: none;
+    }
+    .file-label {
+      display: inline-block;
+      padding: 12px 20px;
+      background: #5a00b3;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 20px;
+      transition: 0.3s;
+    }
+    .file-label:hover {
+      background: #7a00e6;
+    }
+    button {
+      padding: 14px 25px;
+      background: linear-gradient(90deg, #7a00e6, #b300ff);
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    button:disabled {
+      background: gray;
+      cursor: not-allowed;
+    }
+    button:hover:enabled {
+      transform: scale(1.05);
+    }
+    #result {
+      margin-top: 25px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      font-size: 15px;
+      text-align: left;
+      max-height: 250px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      border: 1px solid rgba(140, 0, 255, 0.3);
+    }
+    .glow {
+      text-shadow: 0 0 10px #b300ff, 0 0 20px #8000ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 class="glow">🎤 Sudarshana AI</h1>
+    <h2>Speech to Text Transcription</h2>
+
+    <label for="audioFile" class="file-label">📂 Select Audio File</label>
+    <input type="file" id="audioFile" accept="audio/*">
+
+    <br>
+    <button id="uploadBtn">Transcribe</button>
+
+    <div id="result">Result will appear here...</div>
+  </div>
+
+  <script>
+    const API_KEY = "ddc-a4f-c964629239ac4b1eba7b5a8a57e94a38"; // apna API key daalna bhai
+    const API_URL = "https://api.a4f.co/v1/audio/transcriptions";
+
+    const uploadBtn = document.getElementById("uploadBtn");
+    const fileInput = document.getElementById("audioFile");
+    const resultDiv = document.getElementById("result");
+
+    uploadBtn.addEventListener("click", async () => {
+      if (!fileInput.files[0]) {
+        alert("⚠️ Please select an audio file first!");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("model", "provider-3/whisper-1");
+      formData.append("file", fileInput.files[0]);
+
+      try {
+        resultDiv.textContent = "⏳ Uploading & transcribing...";
+        uploadBtn.disabled = true;
+
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${API_KEY}`
+          },
+          body: formData
+        });
+
+        const data = await response.json();
+        console.log("Response:", data);
+
+        if (data.text) {
+          resultDiv.textContent = "✅ Transcription:\n\n" + data.text;
+        } else {
+          resultDiv.textContent = "⚠️ Error:\n\n" + JSON.stringify(data, null, 2);
+        }
+      } catch (error) {
+        resultDiv.textContent = "❌ Failed:\n\n" + error.message;
+      } finally {
+        uploadBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
